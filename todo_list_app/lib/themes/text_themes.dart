@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 TextStyle getHeadingTextStyle() {
   return GoogleFonts.lato(
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: FontWeight.bold,
   );
 }

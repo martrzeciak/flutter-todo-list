@@ -4,7 +4,6 @@ import 'package:todo_list_app/db/db.dart';
 import '../models/task.dart';
 
 class TaskController extends GetxController {
-
   @override
   void onReady() {
     getTasks();
@@ -19,11 +18,26 @@ class TaskController extends GetxController {
   }
 
   void getTasks() async {
-    List<Map<String, dynamic>> tasks = await DB.query(); 
+    List<Map<String, dynamic>> tasks = await DB.query();
     taskList.assignAll(tasks.map((data) => Task.fromJson(data)).toList());
   }
 
   void delete(Task task) {
     DB.delete(task);
+    getTasks();
+  }
+
+  void markTaskAsCompleted(int taskId) async {
+    await DB.updateStatus(taskId);
+    getTasks();
+  }
+
+  Future<int> updateTask(Task task) async {
+    return await DB.update(task);
+  }
+
+  void deleteAll() async {
+    await DB.deleteAll();
+    getTasks();
   }
 }

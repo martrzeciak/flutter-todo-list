@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_list_app/controllers/task_controller.dart';
+import 'package:todo_list_app/themes/box_decorations.dart';
 import 'package:todo_list_app/themes/text_themes.dart';
 import 'package:todo_list_app/widgets/input_field.dart';
 import '../models/task.dart';
@@ -43,6 +44,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
         },
       ),
       body: Container(
+        decoration: getContainerDecoration(),
+        margin: const EdgeInsets.all(10),
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
           child:
@@ -62,10 +65,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
               title: "Date",
               placeholder: DateFormat.yMd().format(_selectedDate),
               widget: IconButton(
-                icon: Icon(Icons.calendar_month),
+                icon: const Icon(Icons.calendar_month),
                 color: Colors.white70,
                 onPressed: () {
-                  print("hello");
                   _getDateFromUser();
                 },
               ),
@@ -74,7 +76,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
               title: "Start Time",
               placeholder: _startTime,
               widget: IconButton(
-                icon: Icon(Icons.access_time),
+                icon: const Icon(Icons.access_time),
                 onPressed: () {
                   _getTimeFromUser(isStartTime: true);
                 },
@@ -84,7 +86,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
               title: "End Time",
               placeholder: _endTime,
               widget: IconButton(
-                icon: Icon(Icons.access_time),
+                icon: const Icon(Icons.access_time),
                 onPressed: () {
                   _getTimeFromUser(isStartTime: false);
                 },
@@ -113,7 +115,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                 radius: 15,
                                 backgroundColor: Colors.green,
                                 child: _selectedTaskPriority == 1
-                                    ? Icon(
+                                    ? const Icon(
                                         Icons.done,
                                         color: Colors.white,
                                         size: 25,
@@ -140,11 +142,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
                               },
                               child: CircleAvatar(
                                 radius: 15,
-                                backgroundColor: Colors.amber,
+                                backgroundColor: Colors.amber[300],
                                 child: _selectedTaskPriority == 2
-                                    ? Icon(
+                                    ? const Icon(
                                         Icons.done,
-                                        color: Colors.white,
+                                        color: Colors.black,
                                         size: 25,
                                       )
                                     : Container(),
@@ -169,9 +171,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
                               },
                               child: CircleAvatar(
                                   radius: 15,
-                                  backgroundColor: Colors.red,
+                                  backgroundColor: Colors.red[400],
                                   child: _selectedTaskPriority == 3
-                                      ? Icon(
+                                      ? const Icon(
                                           Icons.done,
                                           color: Colors.white,
                                           size: 25,
@@ -231,17 +233,18 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   _getTimeFromUser({required bool isStartTime}) async {
     var pickedTime = await _showTimePicker();
-    String _formatedTime = pickedTime.format(context);
+    if (!mounted) return;
+    String formatedTime = pickedTime.format(context);
 
     if (pickedTime == null) {
       print("Time is empty");
     } else if (isStartTime) {
       setState(() {
-        _startTime = _formatedTime;
+        _startTime = formatedTime;
       });
     } else {
       setState(() {
-        _endTime = _formatedTime;
+        _endTime = formatedTime;
       });
     }
   }

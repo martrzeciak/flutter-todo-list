@@ -6,12 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:todo_list_app/controllers/task_controller.dart';
 import 'package:todo_list_app/themes/colors.dart';
 import 'package:todo_list_app/themes/text_themes.dart';
-import 'package:todo_list_app/themes/decorations_themes.dart';
+import 'package:todo_list_app/themes/box_decorations.dart';
 import 'package:todo_list_app/ui/add_task.dart';
 import 'package:get/get.dart';
-
 import '../models/task.dart';
 import '../widgets/task_tile.dart';
+import 'edit_task.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
+      endDrawer: _addDrawer(),
       appBar: _addAppBar(),
       floatingActionButton: FloatingActionButton.extended(
         label: Text(
@@ -43,18 +44,30 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _addDateBar(),
-              ),
-            ],
+          Container(
+            color: secondaryBackgroundColor,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _addDateBar(),
+                ),
+              ],
+            ),
           ),
-          _addCalenderBar(),
-          Divider(
-            height: 15,
-            thickness: 2,
-            color: appBarColor,
+          Container(
+            //color: secondaryBackgroundColor,
+            padding: const EdgeInsets.only(bottom: 10),
+            margin: const EdgeInsets.only(bottom: 15),
+            decoration:
+                BoxDecoration(color: secondaryBackgroundColor, boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.6),
+                spreadRadius: 1,
+                blurRadius: 6,
+                offset: const Offset(0, 6),
+              )
+            ]),
+            child: _addCalenderBar(),
           ),
           _addTasksList(),
         ],
@@ -70,11 +83,35 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  _addDrawer() {
+    return Drawer(
+      backgroundColor: secondaryBackgroundColor,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+              decoration: BoxDecoration(color: secondaryColor),
+              child: Text("Todo List App")),
+          ListTile(
+            leading: const Icon(
+              Icons.delete,
+            ),
+            title: const Text("Remove all tasks"),
+            onTap: () {
+              _taskController.deleteAll();
+              Get.back();
+            },
+          )
+        ],
+      ),
+    );
+  }
+
   _addDateBar() {
     return Container(
       decoration: getContainerDecoration(),
       //color: Color.fromRGBO(76, 76, 76, 1),
-      padding: const EdgeInsets.all(17),
+      padding: const EdgeInsets.all(20),
       margin: const EdgeInsets.only(left: 10, top: 10, right: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +150,9 @@ class _HomePageState extends State<HomePage> {
             color: Colors.white70, fontWeight: FontWeight.bold),
         width: 70,
         onDateChange: (date) {
-          _selectedDate = date;
+          setState(() {
+            _selectedDate = date;
+          });
         },
       ),
     );
@@ -124,20 +163,24 @@ class _HomePageState extends State<HomePage> {
       return ListView.builder(
           itemCount: _taskController.taskList.length,
           itemBuilder: (_, index) {
-            return AnimationConfiguration.staggeredList(
-                position: index,
-                child: SlideAnimation(
-                    child: FadeInAnimation(
-                  child: Row(children: [
-                    GestureDetector(
-                      onTap: () {
-                        _showPopupBottomMenu(
-                            context, _taskController.taskList[index]);
-                      },
-                      child: TaskTile(_taskController.taskList[index]),
-                    )
-                  ]),
-                )));
+            Task task = _taskController.taskList[index];
+            if (task.date == DateFormat.yMd().format(_selectedDate)) {
+              return AnimationConfiguration.staggeredList(
+                  position: index,
+                  child: SlideAnimation(
+                      child: FadeInAnimation(
+                    child: Row(children: [
+                      GestureDetector(
+                        onTap: () {
+                          _showPopupBottomMenu(context, task);
+                        },
+                        child: TaskTile(task),
+                      )
+                    ]),
+                  )));
+            } else {
+              return Container();
+            }
           });
     }));
   }
@@ -146,8 +189,8 @@ class _HomePageState extends State<HomePage> {
     Get.bottomSheet(Container(
       padding: const EdgeInsets.only(top: 4),
       height: task.isCompleted == 1
-          ? MediaQuery.of(context).size.height * 0.25
-          : MediaQuery.of(context).size.height * 0.33,
+          ? MediaQuery.of(context).size.height * 0.20
+          : MediaQuery.of(context).size.height * 0.34,
       color: backgroundColor,
       child: Column(children: [
         Container(
@@ -156,28 +199,75 @@ class _HomePageState extends State<HomePage> {
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10), color: secondaryColor),
         ),
-        Spacer(),
-        task.isCompleted == 1 ?
-        Container() :
-        _popupMenuButton(label: "Mark as completed", onTap: () {Get.back();}, color: primaryColor, context: context)
+        const Spacer(),
+        task.isCompleted == 1
+            ? Container()
+            : Column(
+                children: [
+                  _popupMenuButton(
+                      label: "Mark as completed",
+                      onTap: () {
+                        _taskController.markTaskAsCompleted(task.id!);
+                        Get.back();
+                      },
+                      color: secondaryColor,
+                      context: context),
+                  _popupMenuButton(
+                      label: "Edit task",
+                      onTap: () async {
+                        Get.back();
+                        await Get.to(() => EditTaskPage(task: task));
+                        _taskController.getTasks();
+                      },
+                      color: secondaryColor,
+                      context: context),
+                ],
+              ),
+        _popupMenuButton(
+            label: "Delete task",
+            onTap: () {
+              _taskController.delete(task);
+              Get.back();
+            },
+            color: Colors.red[300]!,
+            context: context),
+        const SizedBox(
+          height: 15,
+        ),
+        _popupMenuButton(
+            label: "Close",
+            onTap: () {
+              Get.back();
+            },
+            color: primaryColor,
+            context: context),
+        const SizedBox(
+          height: 15,
+        )
       ]),
     ));
   }
 
   _popupMenuButton(
-      {required String label, required Function() onTap, required Color color, bool isClose = false, required BuildContext context}) {
-        return GestureDetector(
-          onTap: onTap,
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            height: 55,
-            width: MediaQuery.of(context).size.width * 0.8,
-            //color: color,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(20)
+      {required String label,
+      required Function() onTap,
+      required Color color,
+      required BuildContext context}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          height: 55,
+          width: MediaQuery.of(context).size.width * 0.8,
+          //color: color,
+          decoration: BoxDecoration(
+              color: color, borderRadius: BorderRadius.circular(20)),
+          child: Center(
+            child: Text(
+              label,
+              style: getTitleTextStyle(),
             ),
-          ),
-        );
-      }
+          )),
+    );
+  }
 }

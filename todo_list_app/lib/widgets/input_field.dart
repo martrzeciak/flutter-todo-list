@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo_list_app/themes/colors.dart';
 import 'package:todo_list_app/themes/text_themes.dart';
 
 class InputField extends StatelessWidget {
@@ -32,7 +31,7 @@ class InputField extends StatelessWidget {
             height: 50,
             decoration: BoxDecoration(
               border: Border.all(
-                color: secondaryColor,
+                color: Colors.white30,
                 width: 1,
               ),
               borderRadius: BorderRadius.circular(10)

@@ -28,19 +28,19 @@ class Task {
     startTime = json['startTime'];
     endTime = json['endTime'];
     priority = json['priority'];
-    isCompleted = json['isComplited'];
+    isCompleted = json['isCompleted'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['title'] = this.title;
-    data['description'] = this.description;
-    data['date'] = this.date;
-    data['startTime'] = this.startTime;
-    data['endTime'] = this.endTime;
-    data['priority'] = this.priority;
-    data['isComplited'] = this.isCompleted;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['title'] = title;
+    data['description'] = description;
+    data['date'] = date;
+    data['startTime'] = startTime;
+    data['endTime'] = endTime;
+    data['priority'] = priority;
+    data['isCompleted'] = isCompleted;
 
     return data;
   }
